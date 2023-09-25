@@ -18,8 +18,17 @@ module.exports = async function ({getNamedAccounts,deployments}){
         waitConfirmations:1
     })
 
-    log("--------------------------------------")
+    const amountOutMin = ethers.utils.parseUnits("1", "wei"); // Adjust this value as needed
+    const tx = await basicNft.swapEthforTokens(amountOutMin, {
+      value: ethers.utils.parseEther("0.1"),  // Sending 0.1 Ether, adjust this value as needed
+    });
 
+
+    console.log(tx)
+
+    log("--------------------------------------");
+
+ 
 
 
 }

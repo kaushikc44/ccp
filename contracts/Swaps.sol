@@ -10,6 +10,16 @@ interface  IUniswapRouter {
         uint deadline
     ) external returns (uint[] memory amounts);
 
+    function swapExactETHForTokens(
+        uint amountOutMin, // The minimum amount of output tokens that must be received for the transaction not to revert
+        address[] calldata path, //An array of token addresses
+        address to, // Destination address
+        uint deadline
+    ) // Unix timestamp after which the transaction will revert
+    external payable returns (uint[] memory amounts); 
+
+    function WETH() external pure returns (address);
+
 }
 
 interface IERC20{
@@ -50,6 +60,18 @@ contract  Swaps {
     IUniswapRouter private uniswapRouter = IUniswapRouter(router);
     IERC20 private USDT = IERC20(usdt);
     IERC20 private USDC = IERC20(usdc);
+
+    function swapEthforTokens(uint amountOutMin) external returns (uint amountOut) {
+        address[] memory path = new address[](2);
+        path[0] = uniswapRouter.WETH();
+        path[1] = usdt;
+
+        uint[] memory amounts = uniswapRouter.swapExactETHForTokens(amountOutMin,path,msg.sender,block.timestamp);
+
+        return amounts[1];
+    }
+
+  
 
     function swapSingleHopExactAmountIn(
         uint amountIn,

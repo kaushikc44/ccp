@@ -1,0 +1,36 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Swaps.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.20;\r\n\r\ninterface  IUniswapRouter {\r\n    function swapExactTokensForTokens(\r\n        uint amountIn,\r\n        uint amountOutMin,\r\n        address[] calldata path,\r\n        address to,\r\n        uint deadline\r\n    ) external returns (uint[] memory amounts);\r\n\r\n    function swapExactETHForTokens(\r\n        uint amountOutMin, // The minimum amount of output tokens that must be received for the transaction not to revert\r\n        address[] calldata path, //An array of token addresses\r\n        address to, // Destination address\r\n        uint deadline\r\n    ) // Unix timestamp after which the transaction will revert\r\n    external payable returns (uint[] memory amounts); \r\n\r\n    function WETH() external pure returns (address);\r\n\r\n}\r\n\r\ninterface IERC20{\r\n     function totalSupply() external view returns (uint);\r\n\r\n    function balanceOf(address account) external view returns (uint);\r\n\r\n    function transfer(address recipient, uint amount) external returns (bool);\r\n\r\n    function allowance(address owner, address spender) external view returns (uint);\r\n\r\n    function approve(address spender, uint amount) external returns (bool);\r\n\r\n    function transferFrom(\r\n        address sender,\r\n        address recipient,\r\n        uint amount\r\n    ) external returns (bool);\r\n\r\n    event Transfer(address indexed from, address indexed to, uint value);\r\n    event Approval(address indexed owner, address indexed spender, uint value);\r\n}\r\n\r\ninterface IWETH is IERC20 {\r\n    function deposit() external payable;\r\n\r\n    function withdraw(uint amount) external;\r\n}\r\n\r\ncontract  Swaps {\r\n\r\n    address private constant router =  0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;\r\n\r\n    address private constant usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;\r\n    address private constant usdc = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;\r\n\r\n\r\n    IUniswapRouter private uniswapRouter = IUniswapRouter(router);\r\n    IERC20 private USDT = IERC20(usdt);\r\n    IERC20 private USDC = IERC20(usdc);\r\n\r\n    function swapEthforTokens(uint amountOutMin) external returns (uint amountOut) {\r\n        address[] memory path = new address[](2);\r\n        path[0] = uniswapRouter.WETH();\r\n        path[1] = usdt;\r\n\r\n        uint[] memory amounts = uniswapRouter.swapExactETHForTokens(amountOutMin,path,msg.sender,block.timestamp);\r\n\r\n        return amounts[1];\r\n    }\r\n\r\n  \r\n\r\n    function swapSingleHopExactAmountIn(\r\n        uint amountIn,\r\n        uint amountOutMin\r\n    ) external returns (uint amountOut) {\r\n        USDT.transferFrom(msg.sender, address(this),amountIn);\r\n        USDT.approve(address(router),amountIn);\r\n\r\n        address[] memory path;\r\n        path = new address[](2);\r\n\r\n        path[0] = usdt;\r\n        path[1] = usdc;\r\n\r\n        uint[] memory amounts = uniswapRouter.swapExactTokensForTokens(amountIn,amountOutMin,path,msg.sender,block.timestamp);\r\n\r\n        return amounts[1];\r\n\r\n    }\r\n\r\n}"
+    }
+  },
+  "settings": {
+    "evmVersion": "paris",
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
